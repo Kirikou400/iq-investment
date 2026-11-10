@@ -4,26 +4,27 @@ export const runtime = "nodejs";
 
 const paymentMethods = [
   {
-    name: "Bank transfer",
-    network: "Demo details only",
+    method: "Bank transfer",
+    name: "Clear Junction Limited",
     icon: Building2,
     details: [
-      ["Account name", "Demo Recipient"],
-      ["IBAN", "PL00 0000 0000 0000 0000 0000 0000"],
-      ["BIC / SWIFT", "DEMO PL XX"],
+      ["Account name", "Emmanuel Bassey"],
+      ["Account Number", "63658507"],
+      ["BIC / SWIFT", "CLJUGB21XXX"],
+      ["IBAN", "GB58CLJU04130763658507"],
     ],
   },
   {
     name: "USDT",
-    network: "TRC20 · demo address",
+    network: "TRC20",
     icon: Coins,
-    details: [["Wallet address", "TDEMO_USDT_ADDRESS_NOT_REAL"]],
+    details: [["Wallet address", "THEo5YrgsZBmv6i2oLqdsaC1htPRHjYPJZ"]],
   },
   {
     name: "Bitcoin (BTC)",
-    network: "Bitcoin network · demo address",
+    network: "Bitcoin network",
     icon: Bitcoin,
-    details: [["Wallet address", "bc1qdemoaddressnotreal"]],
+    details: [["Wallet address", "bc1q7gmu2hrev4mwt5ule6tnrnq5kjc7xhju5c2xsx"]],
   },
 ];
 
@@ -38,13 +39,12 @@ export default function DepositPage() {
           Deposit Funds
         </h1>
         <p className="mt-2 text-sm sm:text-base text-slate-300 max-w-2xl">
-          Choose a payment method to view its demo details.
+          Choose a payment method.
         </p>
       </div>
 
       <section className="rounded-2xl border border-amber-400/20 bg-amber-950/15 p-4 text-xs leading-5 text-amber-100/80">
-        Demo information only. No payments can be initiated or verified from this page. Replace
-        these sample values with your own details when ready.
+       All payments must be initiated or verified from this page.
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
