@@ -56,7 +56,7 @@ async function main() {
     ["/", "Home"],
     ["/investments", "Investment plans"],
     ["/calculator", "Calculator"],
-    ["/deposit", "Deposit placeholder"],
+    ["/deposit", "Deposit page"],
     ["/signin", "Sign-in"],
     ["/signup", "Sign-up"],
   ]) {
@@ -68,7 +68,14 @@ async function main() {
     }
   }
 
-  for (const path of ["/dashboard", "/withdrawal"]) {
+  for (const path of [
+    "/dashboard",
+    "/withdrawal",
+    "/deposit/history",
+    "/admin",
+    "/admin/deposits",
+    "/admin/deposits/test-id",
+  ]) {
     try {
       const response = await request(path);
       assert(
@@ -99,10 +106,29 @@ async function main() {
     assert(me.status === 200 && JSON.parse(me.body).user === null, "Unauthenticated session check returns no user");
 
     const deposits = await request("/api/deposits");
-    assert(deposits.status === 404, "Deposit API is not present");
+    assert(
+      deposits.status === 401 && JSON.parse(deposits.body).error,
+      "Deposit API requires authentication"
+    );
+    const submitDeposit = await request("/api/deposits", "POST", {
+      paymentMethod: "bank_transfer",
+      amountEUR: "100.00",
+      paymentReference: "test-reference",
+    });
+    assert(submitDeposit.status === 401, "Deposit submission requires authentication");
 
     const adminQueue = await request("/api/admin/deposits");
-    assert(adminQueue.status === 404, "Admin deposit API is not present");
+    assert(
+      adminQueue.status === 401 && JSON.parse(adminQueue.body).error,
+      "Admin deposit API requires authentication"
+    );
+    const filteredAdminQueue = await request("/api/admin/deposits?status=invalid");
+    assert(filteredAdminQueue.status === 401, "Filtered admin deposit API requires authentication");
+
+    const review = await request("/api/admin/deposits/test-id", "PATCH", { status: "verified" });
+    assert(review.status === 401, "Deposit review API requires authentication");
+    const adminDetails = await request("/api/admin/deposits/test-id");
+    assert(adminDetails.status === 401, "Admin deposit details require authentication");
 
     const invalidSignup = await request("/api/auth/signup", "POST", {});
     assert(invalidSignup.status === 400, "Invalid signup input is rejected before database access");

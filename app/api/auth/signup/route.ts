@@ -6,6 +6,7 @@ import {
   isDuplicateEmailError,
   sanitizeUser,
 } from "@/lib/auth-server";
+import { isAdmin } from "@/lib/request-user";
 
 export const runtime = "nodejs";
 const allowedTiers = new Set(["TIER 1 Investor", "TIER 2 Investor"]);
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      user: sanitizeUser(user),
+      user: { ...sanitizeUser(user), isAdmin: isAdmin(user) },
     });
   } catch (error: unknown) {
     if (isDuplicateEmailError(error)) {

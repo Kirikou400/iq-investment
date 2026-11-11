@@ -39,6 +39,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const visibleNavigation = [
+    ...navigation,
+    ...(isAuthenticated
+      ? [{ label: "My Deposits", href: "/deposit/history", icon: ArrowDownToLine }]
+      : []),
+    ...(user?.isAdmin
+      ? [{ label: "Admin Dashboard", href: "/admin", icon: ShieldCheck }]
+      : []),
+  ];
 
   return (
     <div className="min-h-screen bg-[#060e0a]">
@@ -82,7 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="space-y-1.5">
-          {navigation.map(({ label, href, icon: Icon }) => {
+          {visibleNavigation.map(({ label, href, icon: Icon }) => {
             const active = pathname === href;
             return (
               <Link

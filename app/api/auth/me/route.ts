@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSession, findUserById, sanitizeUser } from "@/lib/auth-server";
+import { isAdmin } from "@/lib/request-user";
 
 export const runtime = "nodejs";
 
@@ -26,7 +27,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      user: sanitizeUser(user),
+      user: { ...sanitizeUser(user), isAdmin: isAdmin(user) },
     });
   } catch (error: unknown) {
     console.error("Session lookup failed:", error);

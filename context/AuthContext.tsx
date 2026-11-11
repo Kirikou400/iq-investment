@@ -10,6 +10,7 @@ export interface User {
   memberSince: string;
   planTier: string;
   emailVerified?: boolean;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {

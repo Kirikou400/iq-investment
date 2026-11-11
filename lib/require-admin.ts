@@ -1,11 +1,11 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/require-user";
 import { isAdmin } from "@/lib/request-user";
 
 export async function requireAdmin() {
   const user = await requireUser();
-  if (!process.env.ADMIN_EMAILS || !isAdmin(user)) {
-    notFound();
+  if (!isAdmin(user)) {
+    redirect("/dashboard");
   }
   return user;
 }

@@ -16,9 +16,6 @@ export async function getRequestUser(): Promise<StoredUser | null> {
 }
 
 export function isAdmin(user: StoredUser): boolean {
-  if (!user.emailVerified) {
-    return false;
-  }
   const admins = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((email) => email.trim().toLowerCase())

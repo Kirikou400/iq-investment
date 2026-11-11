@@ -6,6 +6,7 @@ import {
   createSession,
   sanitizeUser,
 } from "@/lib/auth-server";
+import { isAdmin } from "@/lib/request-user";
 
 export const runtime = "nodejs";
 
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      user: sanitizeUser(user),
+      user: { ...sanitizeUser(user), isAdmin: isAdmin(user) },
     });
   } catch (error: unknown) {
     console.error("Sign in failed:", error);

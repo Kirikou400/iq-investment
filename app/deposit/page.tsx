@@ -1,4 +1,6 @@
 import { ArrowDownToLine, Bitcoin, Building2, Coins } from "lucide-react";
+import { DepositSubmission } from "@/components/DepositSubmission";
+import Link from "next/link";
 
 export const runtime = "nodejs";
 
@@ -39,12 +41,14 @@ export default function DepositPage() {
           Deposit Funds
         </h1>
         <p className="mt-2 text-sm sm:text-base text-slate-300 max-w-2xl">
-          Choose a payment method.
+          Read the payment instructions carefully, then report a transfer you have already made.
         </p>
       </div>
 
       <section className="rounded-2xl border border-amber-400/20 bg-amber-950/15 p-4 text-xs leading-5 text-amber-100/80">
-       All payments must be initiated or verified from this page.
+        Confirm payment instructions with the organization through a trusted, independent channel
+        before sending funds. A submitted record is only a self-reported claim and is not proof of
+        payment, a promise of returns, or a balance credit.
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
@@ -74,6 +78,11 @@ export default function DepositPage() {
           </article>
         ))}
       </section>
+
+      <DepositSubmission />
+      <Link href="/deposit/history" className="inline-block text-sm font-semibold text-amber-300 underline">
+        View your deposit history
+      </Link>
     </div>
   );
 }
