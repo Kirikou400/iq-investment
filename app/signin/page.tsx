@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  CheckCircle2,
   Eye,
   EyeOff,
   Lock,
@@ -17,7 +16,7 @@ import { IqLogo } from "@/components/IqLogo";
 
 export default function SignInPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +25,12 @@ export default function SignInPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotMsg, setForgotMsg] = useState("");
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +42,8 @@ export default function SignInPage() {
     setLoading(false);
 
     if (res.success) {
-      router.push("/dashboard");
+      // Hard navigation ensures fresh session cookies are dispatched to Server Components
+      window.location.href = "/dashboard";
     } else {
       setError(res.error || "Authentication failed. Check your credentials.");
     }
@@ -68,7 +74,7 @@ export default function SignInPage() {
             <div className="w-full border-t border-emerald-900/40" />
           </div>
           <span className="relative bg-[#091510] px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Or Sign In With Custom Details
+            Enter Your Credentials
           </span>
         </div>
 

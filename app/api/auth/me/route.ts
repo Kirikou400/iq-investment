@@ -4,26 +4,36 @@ import { getSession, findUserById, sanitizeUser } from "@/lib/auth-server";
 import { isAdmin } from "@/lib/request-user";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
-  const cookieStore = cookies();
-  const sessionCookie = cookieStore.get("iq_session");
-
-  if (!sessionCookie?.value) {
-    return NextResponse.json({ user: null });
-  }
-
   try {
+    const cookieStore = cookies();
+    const sessionCookie = cookieStore.get("iq_session");
+
+    if (!sessionCookie?.value) {
+      return NextResponse.json({ user: null });
+    }
+
     const session = await getSession(sessionCookie.value);
     if (!session) {
-      cookieStore.delete("iq_session");
-      return NextResponse.json({ user: null });
+      const response = NextResponse.json({ user: null });
+      response.cookies.delete("iq_session");
+      try {
+        cookieStore.delete("iq_session");
+      } catch {}
+      return response;
     }
 
     const user = await findUserById(session.userId);
     if (!user) {
-      cookieStore.delete("iq_session");
-      return NextResponse.json({ user: null });
+      const response = NextResponse.json({ user: null });
+      response.cookies.delete("iq_session");
+      try {
+        cookieStore.delete("iq_session");
+      } catch {}
+      return response;
     }
 
     return NextResponse.json({
@@ -31,9 +41,6 @@ export async function GET() {
     });
   } catch (error: unknown) {
     console.error("Session lookup failed:", error);
-    return NextResponse.json(
-      { error: "Could not verify the current session." },
-      { status: 500 }
-    );
+    return NextResponse.json({ user: null });
   }
 }

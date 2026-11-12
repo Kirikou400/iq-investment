@@ -6,6 +6,7 @@ import {
   pbkdf2,
 } from "crypto";
 import { promisify } from "util";
+import type { Collection } from "mongodb";
 import { getDatabase } from "@/lib/mongodb";
 
 const pbkdf2Async = promisify(pbkdf2);
@@ -35,24 +36,33 @@ interface StoredSession {
   expiresAt: Date;
 }
 
-let indexesPromise: Promise<void> | undefined;
+let indexesEnsured = false;
+
+async function ensureIndexes(
+  users: Collection<StoredUser>,
+  sessions: Collection<StoredSession>
+) {
+  if (indexesEnsured) return;
+  indexesEnsured = true;
+
+  try {
+    await Promise.allSettled([
+      users.createIndex({ email: 1 }, { unique: true }),
+      sessions.createIndex({ tokenHash: 1 }, { unique: true }),
+      sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    ]);
+  } catch (error) {
+    console.warn("Index creation notice (non-fatal):", error);
+  }
+}
 
 async function getCollections() {
   const database = await getDatabase();
   const users = database.collection<StoredUser>("users");
   const sessions = database.collection<StoredSession>("sessions");
 
-  indexesPromise ??= Promise.all([
-    users.createIndex({ email: 1 }, { unique: true }),
-    sessions.createIndex({ tokenHash: 1 }, { unique: true }),
-    sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-  ]).then(() => undefined);
-  try {
-    await indexesPromise;
-  } catch (error) {
-    indexesPromise = undefined;
-    throw error;
-  }
+  // Run in background without blocking or failing user authentication requests
+  void ensureIndexes(users, sessions);
 
   return { users, sessions };
 }
@@ -79,6 +89,15 @@ export async function createUser(
   planTier: string
 ): Promise<StoredUser> {
   const { users } = await getCollections();
+  const cleanEmail = email.toLowerCase().trim();
+
+  const existing = await users.findOne({ email: cleanEmail });
+  if (existing) {
+    const error: any = new Error("An account with this email already exists.");
+    error.code = 11000;
+    throw error;
+  }
+
   const salt = randomBytes(16).toString("hex");
   const cleanName = name.trim();
   const initials =
@@ -92,7 +111,7 @@ export async function createUser(
   const user: StoredUser = {
     id: randomUUID(),
     name: cleanName,
-    email: email.toLowerCase().trim(),
+    email: cleanEmail,
     passwordHash: await hashPassword(password, salt),
     salt,
     initials,
@@ -168,6 +187,30 @@ export function isDuplicateEmailError(error: unknown): boolean {
     typeof error === "object" &&
     error !== null &&
     "code" in error &&
-    error.code === 11000
+    (error as any).code === 11000
   );
+}
+
+export function formatAuthError(error: unknown, fallbackMessage: string): string {
+  if (error instanceof Error) {
+    if (error.message.includes("MONGODB_URI")) {
+      return "Database configuration missing: Please set MONGODB_URI in your Vercel project environment variables.";
+    }
+    if (
+      error.name === "MongoServerSelectionError" ||
+      error.message.includes("Server selection timed out") ||
+      error.message.includes("ETIMEDOUT") ||
+      error.message.includes("ECONNREFUSED")
+    ) {
+      return "Database connection timed out. In MongoDB Atlas, ensure Network Access allows 0.0.0.0/0 (all IPs) for Vercel.";
+    }
+    if (
+      error.name === "MongoTopologyClosedError" ||
+      error.message.includes("Authentication failed") ||
+      error.message.includes("bad auth")
+    ) {
+      return "Database authentication failed. Please verify your MongoDB connection string credentials in Vercel.";
+    }
+  }
+  return fallbackMessage;
 }

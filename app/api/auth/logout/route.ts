@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { deleteSession } from "@/lib/auth-server";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST() {
   try {
@@ -10,17 +11,33 @@ export async function POST() {
     const sessionCookie = cookieStore.get("iq_session");
 
     if (sessionCookie?.value) {
-      await deleteSession(sessionCookie.value);
+      await deleteSession(sessionCookie.value).catch(() => {});
     }
 
-    cookieStore.delete("iq_session");
+    const response = NextResponse.json({ success: true });
+    response.cookies.set("iq_session", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    });
 
-    return NextResponse.json({ success: true });
+    try {
+      cookieStore.delete("iq_session");
+    } catch {}
+
+    return response;
   } catch (error: unknown) {
     console.error("Sign out failed:", error);
-    return NextResponse.json(
-      { success: false, error: "Could not sign out. Please try again." },
-      { status: 500 }
-    );
+    const response = NextResponse.json({ success: true });
+    response.cookies.set("iq_session", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    });
+    return response;
   }
 }

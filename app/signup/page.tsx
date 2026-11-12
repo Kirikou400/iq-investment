@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -17,7 +17,7 @@ import { IqLogo } from "@/components/IqLogo";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { signup } = useAuth();
+  const { signup, isAuthenticated, isLoading } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,6 +27,12 @@ export default function SignUpPage() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -42,7 +48,8 @@ export default function SignUpPage() {
     setLoading(false);
 
     if (result.success) {
-      router.push("/dashboard");
+      // Hard navigation ensures fresh session cookies are dispatched to Server Components
+      window.location.href = "/dashboard";
       return;
     }
 
@@ -130,8 +137,8 @@ export default function SignUpPage() {
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
                 required
-                placeholder="At least 12 characters"
-                minLength={12}
+                placeholder="At least 8 characters"
+                minLength={8}
                 className="field pl-11 pr-11 text-xs text-white font-mono"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
