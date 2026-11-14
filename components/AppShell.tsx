@@ -14,7 +14,9 @@ import {
   Layers,
   LogIn,
   LogOut,
+  Mail,
   Menu,
+  Phone,
   ShieldCheck,
   TrendingUp,
   UserPlus,
@@ -62,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col border-r border-emerald-900/30 bg-[#08150f] px-5 py-6 transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col overflow-y-auto border-r border-emerald-900/30 bg-[#08150f] px-5 py-6 transition-transform duration-300 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -117,6 +119,35 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+
+        <div className="mt-4 border-t border-emerald-900/30 pt-4">
+          <div className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+            Contact Support
+          </div>
+          <div className="space-y-1">
+            <a
+              href="mailto:zamilaia444@gmail.com"
+              className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-300 transition hover:bg-emerald-950/40 hover:text-white"
+            >
+              <Mail size={15} className="shrink-0 text-[#00E676]" />
+              <span className="break-all">zamilaia444@gmail.com</span>
+            </a>
+            <a
+              href="mailto:robertgaweda82@gmail.com"
+              className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-300 transition hover:bg-emerald-950/40 hover:text-white"
+            >
+              <Mail size={15} className="shrink-0 text-[#00E676]" />
+              <span className="break-all">robertgaweda82@gmail.com</span>
+            </a>
+            <a
+              href="tel:+48692047270"
+              className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-300 transition hover:bg-emerald-950/40 hover:text-white"
+            >
+              <Phone size={15} className="shrink-0 text-[#00E676]" />
+              <span>+48 692 047 270</span>
+            </a>
+          </div>
+        </div>
 
         {/* Auth Quick Links in Sidebar */}
         <div className="mt-4 pt-4 border-t border-emerald-900/30 space-y-1">
